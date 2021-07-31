@@ -1,6 +1,15 @@
+import concurrent.futures
+
+import ml
+from tools import symptoms
+
+
 def main():
-    import ml
-    ml.xgboost_algorithm(14)
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        results = [executor.submit(ml.xgboost_algorithm, [1, symptom]) for symptom in symptoms]
+
+    for f in concurrent.futures.as_completed(results):
+        print(f.result)
 
 
 if __name__ == '__main__':
