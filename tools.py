@@ -12,12 +12,12 @@ def split_all_features_combined_file_to_symptom_files(days):
 
     for symptom in symptoms:
         df_symptom = df.query(f'symptom=="{symptom}"')
-        df_symptom.to_csv(f'symptoms/all_features/ABC/{days}day(s)/{symptom}_all_features_{days}day(s)_ABC.csv',
+        df_symptom.to_csv(f'symptoms/ABC/{days}day(s)/{symptom}_features_{days}day(s)_ABC.csv',
                           index=False)
         for group in groups:
             df_group = df_symptom.query(f'depr_group=="{group}"')
             df_group.to_csv(
-                f'symptoms/all_features/{group}/{days}day(s)/{symptom}_all_features_{days}day(s)_{group}.csv',
+                f'symptoms/{group}/{days}day(s)/{symptom}_features_{days}day(s)_{group}.csv',
                 index=False)
 
 

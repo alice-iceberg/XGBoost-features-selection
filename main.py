@@ -1,8 +1,6 @@
-import tools
-
-
 def main():
-    pass
+    import ml
+    ml.xgboost_algorithm(14)
 
 
 if __name__ == '__main__':
