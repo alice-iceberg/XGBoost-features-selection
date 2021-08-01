@@ -21,7 +21,7 @@ scoring = {
 def xgboost_algorithm(args):
     days = args[0]
     symptom = args[1]
-    output_filename = f'results/ml_results_{days}day(s)_{symptom}.csv'
+    output_filename = f'ml_results_{days}day(s)_{symptom}.csv'
 
     depr_groups_out = []
     symptoms_out = []
@@ -42,7 +42,7 @@ def xgboost_algorithm(args):
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=44)
 
-        model = XGBClassifier(eval_metric='logloss', random_state=44, n_jobs=0)
+        model = XGBClassifier(use_label_encoder=False,eval_metric='logloss', random_state=44, n_jobs=0)
         model.fit(X_train, y_train)
 
         for i in range(1, len(X)):
@@ -58,7 +58,7 @@ def xgboost_algorithm(args):
                 select_X_train = selection.transform(X_train)
 
                 # train model
-                selection_model = XGBClassifier(eval_metric='logloss', n_jobs=0)
+                selection_model = XGBClassifier(use_label_encoder = False, eval_metric='logloss', n_jobs=0)
                 selection_model.fit(select_X_train, y_train)
                 # eval model
                 select_X_test = selection.transform(X_test)
