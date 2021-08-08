@@ -1,14 +1,32 @@
 import pandas as pd
 
 symptoms = ['phq1', 'phq2', 'phq3', 'phq4', 'phq5', 'phq6', 'phq7', 'phq8', 'phq9']
-groups = ['A', 'B', 'C']
+groups = ['A', 'B', 'C', 'ABC']
 general_columns = ['user_id', 'timestamp', 'symptom', 'symptom_score', 'depr_group',
                    'phq1', 'phq2', 'phq3', 'phq4', 'phq5', 'phq6', 'phq7', 'phq8', 'phq9',
                    'add_gender', 'add_age', 'binary_label']
 
+users_remove = [82, 84, 99, 107, 115, 122, 135, 155, 159, 170]
+
 
 def split_all_features_combined_file_to_symptom_files(days):
     df = pd.read_csv(f'combined/combined_features_symptoms_as_rows_{days}day(s).csv')
+
+    #  region selected data 14 days
+    # df = df[~df.user_id.isin(users_remove)]
+    # df = df.drop(df[(df['user_id'] == 85) & (df['timestamp'] == 1608735599000)].index)
+    # df = df.drop(df[(df['user_id'] == 118) & (df['timestamp'] == 1607785199000)].index)
+    # df = df.drop(df[(df['user_id'] == 128) & (df['timestamp'] == 1609685999000)].index)
+    # df = df.drop(df[(df['user_id'] == 131) & (df['timestamp'] == 1609081199000)].index)
+    # df = df.drop(df[(df['user_id'] == 132) & (df['timestamp'] == 1609772399000)].index)
+    # df = df.drop(df[(df['user_id'] == 119) & (df['timestamp'] == 1608562799000)].index)
+    # df = df.drop(df[(df['user_id'] == 119) & (df['timestamp'] == 1609772399000)].index)
+    # df = df.drop(df[(df['user_id'] == 126) & (df['timestamp'] == 1608735599000)].index)
+    # df = df.drop(df[(df['user_id'] == 126) & (df['timestamp'] == 1609945199000)].index)
+    # df = df.drop(df[(df['user_id'] == 153) & (df['timestamp'] == 1609772399000)].index)
+    # df = df.drop(df[(df['user_id'] == 169) & (df['timestamp'] == 1611413999000)].index)
+
+    #  endregion
 
     for symptom in symptoms:
         df_symptom = df.query(f'symptom=="{symptom}"')
@@ -34,6 +52,23 @@ def add_binary_label_column(days):
     df['binary_label'] = binary_labels
 
     df.to_csv(f'combined/combined_features_symptoms_as_rows_{days}day(s).csv', index=False)
+
+
+def add_3classes_label_column(days):
+    for group in groups:
+        for symptom in symptoms:
+            filename = f'symptoms/{group}/{days}day(s)/{symptom}_features_14day(s)_{group}_sel.csv'
+            three_classes = []
+            df = pd.read_csv(filename)
+            for row in df.itertuples():
+                if row.symptom_score == 1:
+                    three_classes.append(0)
+                elif row.symptom_score == 2 or row.symptom_score == 3:
+                    three_classes.append(1)
+                elif row.symptom_score == 4 or row.symptom_score == 5:
+                    three_classes.append(2)
+            df['three_labels'] = three_classes
+            df.to_csv(filename, index=False)
 
 
 def ema_symptoms_as_rows(days):
@@ -126,6 +161,15 @@ def combined_features_symptoms_as_rows(days):
     df_out.to_csv(out_filename, index=False)
 
 
+def concat_ml_results(days, classes):
+    output_filename = f'results/{days}days/{classes}/ml_results_{days}day(s)_selected_{classes}.csv'
+    frames = []
+    for group in groups:
+        for symptom in symptoms:
+            df = pd.read_csv(f'results/{days}days/{classes}/ml_results_{days}day(s)_{symptom}_{group}_selected.csv')
+            frames.append(df)
 
-
+    df_out = pd.concat(frames)
+    df_out = df_out.sort_values(by=['depr_group', 'symptom', 'features_num'])
+    df_out.to_csv(output_filename, index=False)
 
